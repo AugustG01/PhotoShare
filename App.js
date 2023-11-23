@@ -74,28 +74,26 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      
-      <Text onPress={launchImagePicker} style={{top: 80}}>Add Image</Text>
+    <Text onPress={launchImagePicker} style={{ top: 80 }}>
+      Add Image
+    </Text>
 
-      <View style={styles.pictures}>
+    <View style={styles.pictures}>
       <FlatList
-      data={allImages}
-      keyExtractor={(item) => item.name}
-      numColumns={numColumns} // Set the number of columns here
-      renderItem={({ item }) => (
-        <View style={styles.imageContainer}>
-          <Image
-          source={{uri: item.url}}
-          style={styles.image}
-          />
-        </View>
-      )}
-      >
-      </FlatList>
-      </View>
-
-      <StatusBar style="auto" />
+        style={{ height: '100%' }}
+        data={allImages}
+        keyExtractor={(item) => item.name}
+        numColumns={numColumns}
+        renderItem={({ item }) => (
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: item.url }} style={styles.image} />
+          </View>
+        )}
+      />
     </View>
+
+    <StatusBar style="auto" />
+  </View>
   );
 }
 
@@ -105,7 +103,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 'auto',
+    height: '100%', // Change this line
   },
   image: {
       height: 150,
@@ -116,10 +114,10 @@ const styles = StyleSheet.create({
       padding: 5,
       borderWidth: 1,
       borderRadius: 5,
-      borderColor: 'black'
+      borderColor: 'black',
   },
   pictures: {
-    top: 150,
+    top: 100,
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -127,6 +125,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     left: 25,
-    height: 'auto',
+    height: '100%',
+    marginBottom: 120,
   }
 });
