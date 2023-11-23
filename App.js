@@ -1,18 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, FlatList } from 'react-native';
-import { useState } from 'react';
+import { StyleSheet, Text, View, Image, FlatList, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
+import {ref, uploadBytes, getDownloadURL, list} from 'firebase/storage';
 import {storage} from './firebase';
 
 export default function App() {
 
   //const [imagePath, setImagePath] = useState(null)
   const [allImages, setAllImages] = useState([])
+  const [numColumns, setNumColumns] = useState(2); // Initial number of columns
+
+  useEffect(() => {
+    setAllImages(getAllImages)
+  }, [])
 
 
   async function launchImagePicker(){
-
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true
     })
@@ -45,16 +49,41 @@ export default function App() {
     })
   }
 
+  const getAllImages = async () => {
+    const storageRef = ref(storage, 'gs://photoshare-540cf.appspot.com'); // Replace with your actual storage directory
+
+  try {
+    const result = await list(storageRef);
+
+    // result.items is an array containing all the files in the directory
+    const fileUrls = [];
+    
+
+    for (const item of result.items) {
+      const url = await getDownloadURL(item);
+      fileUrls.push({ name: item.name, url });
+    }
+
+    console.log(fileUrls);
+    setAllImages(fileUrls)
+
+  } catch (error) {
+    console.error('Error fetching files from Firestore Storage:', error);
+  }
+  };
+
   return (
     <View style={styles.container}>
       
       <Text onPress={launchImagePicker} style={{top: 80}}>Add Image</Text>
 
+      <View style={styles.pictures}>
       <FlatList
       data={allImages}
-      keyExtractor={(item) => item.id.toString}
+      keyExtractor={(item) => item.name}
+      numColumns={numColumns} // Set the number of columns here
       renderItem={({ item }) => (
-        <View>
+        <View style={styles.imageContainer}>
           <Image
           source={{uri: item.url}}
           style={styles.image}
@@ -63,25 +92,12 @@ export default function App() {
       )}
       >
       </FlatList>
+      </View>
 
       <StatusBar style="auto" />
     </View>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -89,10 +105,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    height: 'auto',
   },
   image: {
-      
-      height: 200,
-      width: 200
+      height: 150,
+      width: 150
+  },
+  imageContainer: {
+      margin: 5,
+      padding: 5,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderColor: 'black'
+  },
+  pictures: {
+    top: 150,
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    left: 25,
+    height: 'auto',
   }
 });
