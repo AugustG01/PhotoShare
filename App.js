@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity } from 'react-native';
+import { Input } from 'react-native-elements';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {ref, uploadBytes, getDownloadURL, list} from 'firebase/storage';
@@ -10,6 +11,7 @@ export default function App() {
   //const [imagePath, setImagePath] = useState(null)
   const [allImages, setAllImages] = useState([])
   const [numColumns, setNumColumns] = useState(2); // Initial number of columns
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     setAllImages(getAllImages)
@@ -72,6 +74,7 @@ export default function App() {
   }
   };
 
+  if (user) {
   return (
     <View style={styles.container}>
     <Text onPress={launchImagePicker} style={{ top: 80 }}>
@@ -95,6 +98,23 @@ export default function App() {
     <StatusBar style="auto" />
   </View>
   );
+}
+else {
+  return (
+    <View style={styles.container}>
+      <Text>Login</Text>
+      <View>
+          <Input type="text" placeholder="user name" />
+          <Input type="password" placeholder="password" />
+          <Text title="login" />
+      </View>
+      <View>
+          <Text>Don't have an account?</Text>
+          <Text title="Sign up" />
+      </View>
+  </View>
+  )
+}
 }
 
 const styles = StyleSheet.create({
