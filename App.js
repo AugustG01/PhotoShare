@@ -1,22 +1,27 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity, Button } from 'react-native';
 import { Input } from 'react-native-elements';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {ref, uploadBytes, getDownloadURL, list} from 'firebase/storage';
 import {storage} from './firebase';
+import axios from 'axios';
 
-export default function App() {
+
+export default function App({userData}) {
 
   //const [imagePath, setImagePath] = useState(null)
   const [allImages, setAllImages] = useState([])
   const [numColumns, setNumColumns] = useState(2); // Initial number of columns
   const [user, setUser] = useState(null);
+  const API_KEY = "AIzaSyB4RD9KgGGisRLSd2Y1jwPGG7pfuNQBKl0"
+  const url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
+  const [enteredEmail, setEnteredEmail] = useState("august@gmail.com")
+  const [enteredPassword, setEnteredPassword] = useState("123456")
 
   useEffect(() => {
     setAllImages(getAllImages)
   }, [])
-
 
   async function launchImagePicker(){
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -51,6 +56,43 @@ export default function App() {
     })
   }
 
+
+  async function login(){
+    try{
+      const response = await axios.post(url + API_KEY, {
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true
+      })
+
+      setUser(response);
+
+      alert("logged in" + response.data.idToken)
+
+      return(
+        < App userData={user}/>
+      )
+    }catch(error){
+      alert("ikke logged ind" + error.message)
+    }
+  }
+
+  async function signup(){
+    try{
+      const response = await axios.post(urlSignUp + API_KEY, {
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true
+      })
+
+      alert("Oprettet!" + response.data.idToken)
+    }catch(error){
+      alert("Ikke Oprettet!!" + error.message)
+    }
+  }
+
+ 
+
   const getAllImages = async () => {
     const storageRef = ref(storage, 'gs://photoshare-540cf.appspot.com'); // Replace with your actual storage directory
 
@@ -74,7 +116,7 @@ export default function App() {
   }
   };
 
-  if (user) {
+  if (user && user != undefined) {
   return (
     <View style={styles.container}>
     <Text onPress={launchImagePicker} style={{ top: 80 }}>
@@ -101,18 +143,18 @@ export default function App() {
 }
 else {
   return (
-    <View style={styles.container}>
-      <Text>Login</Text>
-      <View>
-          <Input type="text" placeholder="user name" />
-          <Input type="password" placeholder="password" />
-          <Text title="login" />
-      </View>
-      <View>
-          <Text>Don't have an account?</Text>
-          <Text title="Sign up" />
-      </View>
-  </View>
+    <View>
+            <Text>loginScreen</Text>
+            <View>
+                <Input type="text" placeholder="user name" />
+                <Input type="password" placeholder="password" />
+                <Button title="login" onPress={login}/>
+            </View>
+            <View>
+                <Text>Don't have an account?</Text>
+                <Button title="Sign up" onPress={signup}/>
+            </View>
+        </View>
   )
 }
 }
