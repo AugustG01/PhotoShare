@@ -20,9 +20,7 @@ export default function App({userData}) {
   const [enteredEmail, setEnteredEmail] = useState("august@gmail.com")
   const [enteredPassword, setEnteredPassword] = useState("123456")
 
-  useEffect(() => {
-    setAllImages(getAllImages)
-  }, [])
+
 
   async function launchImagePicker(){
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -36,27 +34,26 @@ export default function App({userData}) {
           uploadImage(imagePath)
     }
   }
-
+  
+  
   async function uploadImage(imagePath){
     console.log(imagePath)
     const res = await fetch(imagePath)
     const blob = await res.blob()
-    const storageRef = ref(storage, `${Math.random().toString(36).substr(2, 8)}.jpg`);
+    const storageRef = ref(storage, user.data.localId + `-${Math.random().toString(36).substr(2, 8)}.jpg`);
     uploadBytes(storageRef, blob).then(() => {
       alert("image uploaded")
     })
   }
-
+    
 
   async function downloadImage(id){
-
     getDownloadURL(ref(storage, id +'.jpg')).then((url) => {
       setImagePath(url)
     }).catch((error) => {
       console.log(error)
     })
   }
-
 
   async function login(){
     try{
@@ -67,6 +64,9 @@ export default function App({userData}) {
       })
 
       setUser(response);
+      console.log(response.data.localId);
+      
+      setAllImages(getAllImages(response.data.localId));
 
       alert("logged in" + response.data.idToken)
 
@@ -94,7 +94,7 @@ export default function App({userData}) {
 
  
 
-  const getAllImages = async () => {
+  const getAllImages = async (userUID) => {
     const storageRef = ref(storage, 'gs://photoshare-540cf.appspot.com'); // Replace with your actual storage directory
 
   try {
@@ -110,7 +110,10 @@ export default function App({userData}) {
     }
 
     console.log(fileUrls);
-    setAllImages(fileUrls)
+    //fileUrls.filter(fileUrls => fileUrls.name.includes(userUID));
+    let filteredFileUrls = fileUrls.filter(fileUrl => fileUrl.name.includes(userUID));
+    console.log(filteredFileUrls);
+    setAllImages(filteredFileUrls);
 
   } catch (error) {
     console.error('Error fetching files from Firestore Storage:', error);
