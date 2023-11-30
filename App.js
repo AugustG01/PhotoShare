@@ -16,6 +16,7 @@ export default function App({userData}) {
   const [user, setUser] = useState(null);
   const API_KEY = "AIzaSyB4RD9KgGGisRLSd2Y1jwPGG7pfuNQBKl0"
   const url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
+  const urlSignUp = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="
   const [enteredEmail, setEnteredEmail] = useState("august@gmail.com")
   const [enteredPassword, setEnteredPassword] = useState("123456")
 
@@ -146,8 +147,8 @@ else {
     <View>
             <Text>loginScreen</Text>
             <View>
-                <Input type="text" placeholder="user name" />
-                <Input type="password" placeholder="password" />
+                <Input type="text" placeholder="email" onChangeText={setEnteredEmail} />
+                <Input type="password" placeholder="password" onChangeText={setEnteredPassword} />
                 <Button title="login" onPress={login}/>
             </View>
             <View>
