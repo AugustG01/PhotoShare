@@ -17,8 +17,8 @@ export default function App({userData}) {
   const API_KEY = "AIzaSyB4RD9KgGGisRLSd2Y1jwPGG7pfuNQBKl0"
   const url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
   const urlSignUp = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="
-  const [enteredEmail, setEnteredEmail] = useState("august@gmail.com")
-  const [enteredPassword, setEnteredPassword] = useState("123456")
+  const [enteredEmail, setEnteredEmail] = useState("")
+  const [enteredPassword, setEnteredPassword] = useState("")
 
 
 
@@ -73,13 +73,13 @@ export default function App({userData}) {
       
       setAllImages(getAllImages(response.data.localId));
 
-      alert("logged in" + response.data.idToken)
+      
 
       return(
         < App userData={user}/>
       )
     }catch(error){
-      alert("ikke logged ind" + error.message)
+      alert("Forkert kode eller email, prøv igen.")
     }
   }
 
@@ -132,7 +132,7 @@ export default function App({userData}) {
     <View style={styles.container}>
     
     <View style={styles.signOut}>
-      <Button title='Sign out' style={{ top: 80, left: 20}} onPress={signOut}/>
+      <Button title='Sign out' color='red' style={{ top: 80, left: 20, color: '#fff'}} onPress={signOut}/>
     </View>
     <View style={styles.addImage}>
       <Button title='Add Image' onPress={launchImagePicker} style={{ top: 80 }} />
@@ -164,7 +164,7 @@ else {
             <Text style={styles.welcomeScreen}>PhotoShare</Text>
             <View>
                 <Input type="text" placeholder="email" onChangeText={setEnteredEmail} />
-                <Input type="password" placeholder="password" onChangeText={setEnteredPassword} />
+                <Input secureTextEntry={true} type="password" placeholder="password" onChangeText={setEnteredPassword} />
                 <Button title="login" onPress={login}/>
             </View>
             <View>
@@ -183,7 +183,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%', // Change this line
-    width: '90%'
+    width: '90%',
+    marginLeft: 'auto',
+    marginRight: 'auto'
   },
   image: {
       height: 150,
@@ -204,19 +206,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 'auto',
     marginRight: 'auto',
-    left: 25,
+    left: 5,
     height: '100%',
     marginBottom: 120,
   },
   signOut: {
     top: 50,
-    left: -125,
-    marginBottom: 20
+    left: -127,
+    marginBottom: 20,
 
 
   },
   addImage: {
     top: 50,
+    width: 335
     
   },
   logInScreen: {
