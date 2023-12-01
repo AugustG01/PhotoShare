@@ -47,6 +47,11 @@ export default function App({userData}) {
   }
     
 
+  function signOut(user){
+    setUser(null)
+
+  }
+  
   async function downloadImage(id){
     getDownloadURL(ref(storage, id +'.jpg')).then((url) => {
       setImagePath(url)
@@ -122,10 +127,17 @@ export default function App({userData}) {
 
   if (user && user != undefined) {
   return (
+    
+    
     <View style={styles.container}>
-    <Text onPress={launchImagePicker} style={{ top: 80 }}>
-      Add Image
-    </Text>
+    
+    <View style={styles.signOut}>
+      <Button title='Sign out' style={{ top: 80, left: 20}} onPress={signOut}/>
+    </View>
+    <View style={styles.addImage}>
+      <Button title='Add Image' onPress={launchImagePicker} style={{ top: 80 }} />
+    </View>
+      
 
     <View style={styles.pictures}>
       <FlatList
@@ -147,8 +159,9 @@ export default function App({userData}) {
 }
 else {
   return (
-    <View>
-            <Text>loginScreen</Text>
+    <View style={styles.logInScreen}>
+      <Image source={require('./assets/logo.png')} style={styles.logo} />
+            <Text style={styles.welcomeScreen}>PhotoShare</Text>
             <View>
                 <Input type="text" placeholder="email" onChangeText={setEnteredEmail} />
                 <Input type="password" placeholder="password" onChangeText={setEnteredPassword} />
@@ -170,6 +183,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%', // Change this line
+    width: '90%'
   },
   image: {
       height: 150,
@@ -183,7 +197,7 @@ const styles = StyleSheet.create({
       borderColor: 'black',
   },
   pictures: {
-    top: 100,
+    top: 80,
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -193,5 +207,35 @@ const styles = StyleSheet.create({
     left: 25,
     height: '100%',
     marginBottom: 120,
+  },
+  signOut: {
+    top: 50,
+    left: -125,
+    marginBottom: 20
+
+
+  },
+  addImage: {
+    top: 50,
+    
+  },
+  logInScreen: {
+    width: '90%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    top: '10%'
+  },
+  welcomeScreen: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 50
+  },
+  logo:{
+    width: 200,
+    height: 200,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginBottom: 10
   }
 });
