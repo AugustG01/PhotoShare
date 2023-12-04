@@ -1,10 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, FlatList, ScrollView, TouchableOpacity, Button, Modal } from 'react-native';
 import { Input } from 'react-native-elements';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {ref, uploadBytes, getDownloadURL, list} from 'firebase/storage';
 import {storage} from './firebase';
+import { getDatabase, set } from "firebase/database";
 import axios from 'axios';
 
 
@@ -17,8 +18,12 @@ export default function App({userData}) {
   const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
   const url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
   const urlSignUp = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="
+  const getUserData = "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key="
+  const databaseURL = "https://photoshare-540cf-default-rtdb.europe-west1.firebasedatabase.app/users"
   const [enteredEmail, setEnteredEmail] = useState("")
   const [enteredPassword, setEnteredPassword] = useState("")
+  const [modalVisible, setModalVisible] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
 
 
 
@@ -92,13 +97,33 @@ export default function App({userData}) {
         returnSecureToken: true
       })
 
+      // Insert user into Firebase realtime database
+      const userUID = response.data.localId;
+      const data = {
+        email: enteredEmail,
+        userUID: userUID,
+        shared: []
+      }
+      await axios.post(databaseURL + ".json", data);
+
       alert("Oprettet!" + response.data.idToken)
     }catch(error){
       alert("Ikke Oprettet!!" + error.message)
     }
   }
 
- 
+  const shareImages = async () => {
+    console.log(shareEmail);
+
+    // Get all user's uid from email in Firebase realtime database
+    const response = await axios.get(databaseURL + ".json");
+    const users = response.data;
+    const userEmails = Object.values(users).map(user => user.email);
+    const shareUserUID = Object.values(users).find(user => user.email === shareEmail).userUID;
+    console.log(shareUserUID);
+
+  }
+
 
   const getAllImages = async (userUID) => {
     const storageRef = ref(storage, 'gs://photoshare-540cf.appspot.com'); // Replace with your actual storage directory
@@ -138,6 +163,9 @@ export default function App({userData}) {
     <View style={styles.addImage}>
       <Button title='Add Image' onPress={launchImagePicker} style={{ top: 80 }} />
     </View>
+    <View style={styles.share}>
+      <Button title='Share' onPress={() => setModalVisible(true)} style={{ top: 80 }} />
+    </View>
       
 
     <View style={styles.pictures}>
@@ -153,6 +181,21 @@ export default function App({userData}) {
         )}
       />
     </View>
+
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => {
+        Alert.alert("Modal has been closed.");
+        setModalVisible(!modalVisible);
+      }}
+    >
+      <View style={styles.modalView}>
+        <Input placeholder="Email" onChangeText={setShareEmail} />
+        <Button title="Share!" onPress={shareImages} />
+      </View>
+    </Modal>
 
     <StatusBar style="auto" />
   </View>
@@ -241,5 +284,26 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     marginBottom: 10
+  },
+  share: {
+    top: -43,
+    width: 335,
+    left: 127
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    top: 250,
+    left: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    width: 300,
+    height: 300,
+    shadowOffset: {
+      width: 0,
+      height: 2
+    }
   }
 });
