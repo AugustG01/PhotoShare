@@ -14,7 +14,7 @@ export default function App({userData}) {
   const [allImages, setAllImages] = useState([])
   const [numColumns, setNumColumns] = useState(2); // Initial number of columns
   const [user, setUser] = useState(null);
-  const API_KEY = "AIzaSyB4RD9KgGGisRLSd2Y1jwPGG7pfuNQBKl0"
+  const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
   const url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
   const urlSignUp = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="
   const [enteredEmail, setEnteredEmail] = useState("")
@@ -42,6 +42,7 @@ export default function App({userData}) {
     const blob = await res.blob()
     const storageRef = ref(storage, user.data.localId + `-${Math.random().toString(36).substr(2, 8)}.jpg`);
     uploadBytes(storageRef, blob).then(() => {
+      getAllImages(user.data.localId)
       alert("image uploaded")
     })
   }
