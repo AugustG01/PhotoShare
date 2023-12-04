@@ -102,7 +102,7 @@ export default function App({userData}) {
       const data = {
         email: enteredEmail,
         userUID: userUID,
-        shared: []
+        shared: ["none"]
       }
       await axios.post(databaseURL + ".json", data);
 
@@ -115,13 +115,20 @@ export default function App({userData}) {
   const shareImages = async () => {
     console.log(shareEmail);
 
-    // Get all user's uid from email in Firebase realtime database
+    // Get all user's UID from email in Firebase realtime database
     const response = await axios.get(databaseURL + ".json");
     const users = response.data;
-    const userEmails = Object.values(users).map(user => user.email);
     const shareUserUID = Object.values(users).find(user => user.email === shareEmail).userUID;
     console.log(shareUserUID);
 
+    // Input main user's UID into shared array in Firebase realtime database
+    const mainUserUID = user.data.localId;
+    const shareUserShareArray = Object.values(users).find(user => user.userUID === shareUserUID).shared;
+    shareUserShareArray.push(mainUserUID);
+    console.log(shareUserShareArray);
+    await axios.put(databaseURL + ".json", users);
+
+    console.log("Shared array updated successfully!");
   }
 
 
