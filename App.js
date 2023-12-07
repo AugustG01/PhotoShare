@@ -120,20 +120,34 @@ export default function App({userData}) {
     const users = response.data;
     const shareUserUID = Object.values(users).find(user => user.email === shareEmail).userUID;
     console.log(shareUserUID);
+    
 
     // Input main user's UID into shared array in Firebase realtime database
     const mainUserUID = user.data.localId;
     const shareUserShareArray = Object.values(users).find(user => user.userUID === shareUserUID).shared;
+    //Check if user already exists in shared array
+    if (shareUserShareArray.includes(mainUserUID)) {
+      alert("User already shared with!");
+      return;
+    }
     shareUserShareArray.push(mainUserUID);
     console.log(shareUserShareArray);
     await axios.put(databaseURL + ".json", users);
 
     console.log("Shared array updated successfully!");
+
+    setModalVisible(!modalVisible);
   }
 
 
   const getAllImages = async (userUID) => {
+    //Check the user's shared array in Firebase realtime database
+    const response = await axios.get(databaseURL + ".json");
+    const users = response.data;
+    const sharedArray = Object.values(users).find(user => user.userUID === userUID).shared;
+
     const storageRef = ref(storage, 'gs://photoshare-540cf.appspot.com'); // Replace with your actual storage directory
+
 
   try {
     const result = await list(storageRef);
@@ -150,7 +164,18 @@ export default function App({userData}) {
     console.log(fileUrls);
     //fileUrls.filter(fileUrls => fileUrls.name.includes(userUID));
     let filteredFileUrls = fileUrls.filter(fileUrl => fileUrl.name.includes(userUID));
-    console.log(filteredFileUrls);
+    console.log("1. " + filteredFileUrls);
+
+    for (const sharedUserUID of sharedArray) {
+      const sharedUserFileUrls = fileUrls.filter(fileUrl => fileUrl.name.includes(sharedUserUID));
+      if (sharedUserFileUrls.length === 0) {
+        continue;
+      } else {
+        filteredFileUrls = filteredFileUrls.concat(sharedUserFileUrls);
+      }
+    }
+    console.log("2. " + filteredFileUrls);
+
     setAllImages(filteredFileUrls);
 
   } catch (error) {
@@ -199,6 +224,7 @@ export default function App({userData}) {
       }}
     >
       <View style={styles.modalView}>
+        <Button title="Close" onPress={() => setModalVisible(!modalVisible)} />
         <Input placeholder="Email" onChangeText={setShareEmail} />
         <Button title="Share!" onPress={shareImages} />
       </View>
